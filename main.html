@@ -88,7 +88,7 @@
         {
           id: 'mediumChart1',
           data: [20, 30, 20, 20, 10], // Data for the first chart (Right, Right-Center, Center, Left-Center, Left)
-          title: 'Overall Sentiment', // Custom title for this chart
+          title: 'Medium 1', // Custom title for this chart
           barThickness: 80, // Adjust as needed for each chart
           maxBarThickness: 80,
           plugins: {
@@ -107,7 +107,7 @@
         {
           id: 'mediumChart2',
           data: [10, 10, 60, 10, 10], // Different data for the second chart
-          title: 'Specific Topic A',
+          title: 'Medium 2',
           barThickness: 80,
           maxBarThickness: 80,
           plugins: {
@@ -126,7 +126,7 @@
         {
           id: 'mediumChart3',
           data: [50, 20, 10, 10, 10], // Different data for the third chart
-          title: 'Specific Topic B',
+          title: 'Medium 3',
           barThickness: 80,
           maxBarThickness: 80,
           plugins: {
@@ -149,25 +149,9 @@
         const ctx = document.getElementById(config.id).getContext('2d');
         const defaultDatasets = [
             {
-                label: 'Right',
-                data: [config.data[0]],
-                backgroundColor: 'rgba(255, 99, 132, 0.8)',
-                stack: 'leaningStack' + config.id, // Ensure unique stack for each chart's bar
-                borderColor: '#f0f0f0',
-                borderWidth: 1
-            },
-            {
-                label: 'Right-Center',
-                data: [config.data[1]],
-                backgroundColor: 'rgba(220, 143, 161, 0.8)',
-                stack: 'leaningStack' + config.id,
-                borderColor: '#f0f0f0',
-                borderWidth: 1
-            },
-            {
-                label: 'Center',
-                data: [config.data[2]],
-                backgroundColor: 'rgba(185, 187, 190, 0.8)',
+                label: 'Left',
+                data: [config.data[4]],
+                backgroundColor: 'rgba(54, 162, 235, 0.8)',
                 stack: 'leaningStack' + config.id,
                 borderColor: '#f0f0f0',
                 borderWidth: 1
@@ -181,12 +165,28 @@
                 borderWidth: 1
             },
             {
-                label: 'Left',
-                data: [config.data[4]],
-                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                label: 'Center',
+                data: [config.data[2]],
+                backgroundColor: 'rgba(185, 187, 190, 0.8)',
                 stack: 'leaningStack' + config.id,
                 borderColor: '#f0f0f0',
                 borderWidth: 1
+            },
+            {
+                label: 'Right-Center',
+                  data: [config.data[1]],
+                  backgroundColor: 'rgba(220, 143, 161, 0.8)',
+                  stack: 'leaningStack' + config.id,
+                  borderColor: '#f0f0f0',
+                  borderWidth: 1
+            },
+            {
+                label: 'Right',
+                  data: [config.data[0]],
+                  backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                  stack: 'leaningStack' + config.id, // Ensure unique stack for each chart's bar
+                  borderColor: '#f0f0f0',
+                  borderWidth: 1
             }
         ];
 
