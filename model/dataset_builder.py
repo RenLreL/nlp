@@ -109,12 +109,12 @@ class DatasetBuilder:
 
     @staticmethod
     def remove_media_clues(df, outlet_names, outlet_name_variations):
-
-        df["text"] = df["title"] + df["description"] + df["maintext"]
-        df["text"] = df["text"].str.slice(0, 1024)
+        df["text"] = df["title"] + df["maintext"]
+        df["text"] = df["text"].str.slice(0, 1024) # BERT accepts 128 tokens, approx. 512 characters, w/ tolerance 1024
         media_names = outlet_names
         media_abbreviations = outlet_name_variations
         media_name_clues = media_names + media_abbreviations
+        media_name_clues = list(dict.fromkeys(media_name_clues))
         to_remove = [clue for clue in media_name_clues if len(clue) > 2]
         
         regex_text = '|'.join(map(re.escape, to_remove))
