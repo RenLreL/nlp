@@ -22,6 +22,7 @@ class ArticleBiasData:
         self.article_url_extracts = self.get_article_url_extracts()
         outlet_name_variator = OutletNameVariator(self.ratings)
         self.outlet_name_variations = outlet_name_variator.get_outlet_name_variations()
+        print(self.outlet_name_variations)
 
         outlet_url_matchmaker = OutletUrlMatchmaker(
             self.article_url_extracts,
@@ -41,7 +42,7 @@ class ArticleBiasData:
 
     def get_article_url_extracts(self):
         url_list = self.news_articles.media_outlet_urls
-        url_extracts = [ArticleBiasData.url_extract(url) for url in url_list]
+        url_extracts = [self.url_extract(url) for url in url_list]
 
         url_df = pd.DataFrame(
             {
@@ -49,10 +50,6 @@ class ArticleBiasData:
                 "url_extract": url_extracts
             }
         )
-
-        print("url df")
-
-        print(url_df)
 
         return url_df
     

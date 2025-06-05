@@ -4,3 +4,8 @@ notebooks/*
 !notebooks/f.lastname/
 .venv
 **/__pycache__/
+model/bert_news_classifier
+*.h5
+*.tsv
+*.ipynb
+.python-version

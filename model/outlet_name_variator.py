@@ -31,8 +31,6 @@ class OutletNameVariator:
             ignore_index=True
         )
 
-        print("outlet name variations:", len(outlet_name_variations))
-
         return outlet_name_variations
     
 

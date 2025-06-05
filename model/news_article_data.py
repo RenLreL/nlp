@@ -31,8 +31,10 @@ class NewsArticleData:
     def read_news_articles(self):
         json_dir = self.data_path
         json_files = [f for f in os.listdir(json_dir) if f.endswith('.json')]
+        json_filepaths = [os.path.join(json_dir, file) for file in json_files]
+        df_list = [pd.read_json(filepath) for filepath in json_filepaths]
 
-        df_list = [pd.read_json(os.path.join(json_dir, file)) for file in json_files]
+        # df_list = [pd.read_json(os.path.join(json_dir, file)) for file in json_files]
         combined_df = pd.concat(df_list, axis=1)
         column_names = list(combined_df.index)
 

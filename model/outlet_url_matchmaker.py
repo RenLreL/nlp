@@ -27,9 +27,6 @@ class OutletUrlMatchmaker:
     def match_datasets(self, url_dataset, name_dataset):
         threshold = 85
         choices = name_dataset["name_modification"].to_list()
-        print("Choices:")
-        print(choices)
-        print(url_dataset["url_extract"])
         extract = lambda query: process.extractOne(
             query,
             choices,
@@ -55,15 +52,11 @@ class OutletUrlMatchmaker:
         )
         match_df = match_df.drop_duplicates(["url"])
 
-        print(match_df)
-        print(match_df["edits"].value_counts())
-
         return match_df
     
 
     def merge_datasets(self, rating_name_dataset, article_url_dataset):
         match_df = self.match_df
-        print(len(article_url_dataset), len(rating_name_dataset), len(self.match_df))
 
         articles_names = article_url_dataset.merge(
             match_df,

@@ -29,7 +29,5 @@ class RatingsData:
             }
         )
 
-        print(media_outlet_names)
-
         return media_outlet_names
     
