@@ -17,7 +17,7 @@ st.markdown(
     """
     <style>
     .stApp {
-        background-color: #f0f0f0; /* Page background color */
+        background-color: #ffffff; /* Page background color */
     }
 
     /* Title styling */
@@ -29,7 +29,7 @@ st.markdown(
 
     /* Style for the text input box itself */
     .stTextArea > div > div > textarea {
-        background-color: #ffffff;
+        /*background-color: #ffffff;*/
         border: 1px solid #cccccc;
         border-radius: 5px;
     }
@@ -48,7 +48,7 @@ if "current_chart_display" not in st.session_state:
 
 data_class_avg = {
     "Junge Welt": [0.1, 0.2, 0.3, 0.15, 0.25],    
-    "Nd": [0.2, 0.1, 0.25, 0.15, 0.3],            
+    "nd": [0.2, 0.1, 0.25, 0.15, 0.3],            
     "Jacobin": [0.15, 0.25, 0.1, 0.2, 0.3],       
     "Tagesschau": [0.22, 0.18, 0.2, 0.2, 0.2],    
     "Taz": [0.17, 0.23, 0.3, 0.1, 0.2],           
@@ -58,13 +58,19 @@ data_class_avg = {
 
 data_article_avg = {
     "Junge Welt": [0.2, 0.2, 0.2, 0.2, 0.2],
-    "Nd": [0.2, 0.2, 0.2, 0.2, 0.2],
+    "nd": [0.2, 0.2, 0.2, 0.2, 0.2],
     "Jacobin": [0.2, 0.2, 0.2, 0.2, 0.2],
     "Tagesschau": [0.2, 0.2, 0.2, 0.2, 0.2],
     "Taz": [0.2, 0.2, 0.2, 0.2, 0.2],
     "Junge Freiheit": [0.2, 0.2, 0.2, 0.2, 0.2],
     "Tichys Einblick": [0.2, 0.2, 0.2, 0.2, 0.2]
 }
+
+#'article_links_html': [
+#    '<a href=\'http://cnn.com/a3\' target=\'_blank\'>CNN A3</a>',
+#    '<a href=\'http://cnn.com/a1\' target=\'_blank\'>CNN A1</a><br><a href=\'http://cnn.com/a2\' target=\'_blank\'>CNN A2</a>',
+#    '<a href=\'http://fox.com/b1\' target=\'_blank\'>Fox B1</a>'
+#]
 
 classes = ["left", "left-center", "center", "right-center", "right"]
 
@@ -86,12 +92,31 @@ def dict_to_pdf(data_dict):
 df_media = dict_to_pdf(data_class_avg)
 df_article = dict_to_pdf(data_article_avg)
 
+# pastel
+#colors_classes = [
+#    "rgba(54, 162, 235, 0.8)",
+#    "rgba(120, 175, 213, 0.8)",
+#    "rgba(185, 187, 190, 0.8)",
+#    "rgba(220, 143, 161, 0.8)",
+#    "rgba(255, 99, 132, 0.8)"
+#]
+
+# darker, desaturated
+#colors_classes = [
+#    "rgba(0, 102, 204, 0.8)",  
+#    "rgba(0, 134, 182, 0.8)",
+#    "rgba(102, 102, 102, 0.8)",
+#    "rgba(189, 78, 107, 0.8)",
+#    "rgba(204, 0, 0, 0.8)"    
+#]
+
+# slightly brighter
 colors_classes = [
-    "rgba(54, 162, 235, 0.8)",
-    "rgba(120, 175, 213, 0.8)",
-    "rgba(185, 187, 190, 0.8)",
-    "rgba(220, 143, 161, 0.8)",
-    "rgba(255, 99, 132, 0.8)"
+    "rgba(0, 119, 204, 0.8)",    
+    "rgba(51, 153, 204, 0.8)",   
+    "rgba(153, 153, 153, 0.8)",  
+    "rgba(255, 102, 102, 0.8)",  
+    "rgba(255, 51, 51, 0.8)"     
 ]
 
 def create_stacked_chart(*, df, chart_title):
@@ -114,8 +139,8 @@ def create_stacked_chart(*, df, chart_title):
         margin=dict(l=0, r=0, t=30, b=0),
         showlegend=False,
         yaxis_title=None,
-        paper_bgcolor='#f0f0f0',
-        plot_bgcolor='#f0f0f0',
+        #paper_bgcolor='#f0f0f0',
+        #plot_bgcolor='#f0f0f0',
         yaxis=dict(
             tickfont=dict(
                 size=18,
@@ -135,15 +160,15 @@ def create_stacked_chart(*, df, chart_title):
     )
     return fig
 
-col_left_spacer, col_content, col_right_spacer = st.columns([1, 10, 1])
+# Title of the application
+st.title("Text Erkennung - Politische Neigung")
 
-with col_content:
-    # Title of the application
-    st.title("Text Erkennung - Politische Neigung")
+# whitespace
+st.text("")
 
-    # whitespace
-    st.text("")
+col_user_input, col_spacer, col_analysis = st.columns([37, 1, 40])
 
+with col_user_input:
     user_input = st.text_area(
         "Gib einen Text ein:",
         height=200,
@@ -162,7 +187,7 @@ with col_content:
             st.session_state.user_input = ""
         st.button("Lösche Input", on_click=clear_text)
 
-
+with col_analysis:
     if analyze_clicked:
         if user_input.strip():
             try:
@@ -173,7 +198,9 @@ with col_content:
                 )
                 if response.status_code == 200:
                     st.session_state.analysis_result = response.json()
-                    st.success("Analyse abgeschlossen!")
+                    #st.text("")
+                    #st.text("")
+                    #st.success("Analyse abgeschlossen!")
 
                 else:
                     st.error(f"Fehler vom Server: {response.status_code}")
@@ -185,7 +212,7 @@ with col_content:
     
     # Display the analysis result if available
     if st.session_state.analysis_result:
-        st.subheader("Analyseergebnis:")
+        st.subheader("Politische Neigung (in %)")
 
         # Convert to percentages
         result_percent = {k: v * 100 for k, v in st.session_state.analysis_result.items()}
@@ -197,54 +224,54 @@ with col_content:
         # Create bar chart using Plotly
         fig = go.Figure(data=[
             go.Bar(
-                name='Politische Neigung',
                 x=order,
                 y=values,
                 marker_color=colors_classes
             )
         ])
         fig.update_layout(
-            yaxis_title="Prozent",
-            title="Politische Neigung (in %)",
             yaxis=dict(range=[0, 100]),
-            plot_bgcolor="rgba(240, 240, 240, 1)",
-            paper_bgcolor="rgba(240, 240, 240, 1)"
+            yaxis_title=None,
+            height=400,
+            margin=dict(l=0, r=0, t=0, b=0),
+            # width=800,
+            #plot_bgcolor="rgba(240, 240, 240, 1)",
+            #paper_bgcolor="rgba(240, 240, 240, 1)"
 
         )
 
         # Show chart
         st.plotly_chart(fig)
 
-
         # Determine the dominant political leaning
         dominant_leaning = max(result_percent, key=result_percent.get)
         st.write(f"Der Text ist am ehesten **{dominant_leaning}** gerichtet.")
 
-    # whitespace
-    st.text("")
-    st.text("")
-    st.write("---")
+# whitespace
+st.text("")
+st.text("")
+st.write("---")
 
-    st.title("Politische Neigung versch. Medien")
-    st.text("")
+st.title("Politische Neigung versch. Medien")
+st.text("")
 
-    chart_col, nav_col = st.columns([11, 1])
+chart_col, nav_col = st.columns([35, 1])
 
-    with chart_col:
-        if st.session_state.current_chart_display == "chart1":
-            fig = create_stacked_chart(df=df_media, chart_title="nach Klassendurchschnitt")
-            st.plotly_chart(fig, use_container_width=True)
-        elif st.session_state.current_chart_display == "chart2":
-            fig2 = create_stacked_chart(df=df_article, chart_title="nach Anzahl Artikel")
-            st.plotly_chart(fig2, use_container_width=True)
+with chart_col:
+    if st.session_state.current_chart_display == "chart1":
+        fig = create_stacked_chart(df=df_media, chart_title="nach Klassendurchschnitt")
+        st.plotly_chart(fig, use_container_width=True)
+    elif st.session_state.current_chart_display == "chart2":
+        fig2 = create_stacked_chart(df=df_article, chart_title="nach Anzahl Artikel")
+        st.plotly_chart(fig2, use_container_width=True)
 
-    with nav_col:
-        st.markdown("<div style='height: 210px;'></div>", unsafe_allow_html=True)
-        if st.session_state.current_chart_display == "chart1":
-            if st.button("->", key="next_chart_btn"):
-                st.session_state.current_chart_display = "chart2"
-                st.rerun()
-        elif st.session_state.current_chart_display == "chart2":
-            if st.button("<-", key="prev_chart_btn"):
-                st.session_state.current_chart_display = "chart1"
-                st.rerun()
+with nav_col:
+    st.markdown("<div style='height: 210px;'></div>", unsafe_allow_html=True)
+    if st.session_state.current_chart_display == "chart1":
+        if st.button("->", key="next_chart_btn"):
+            st.session_state.current_chart_display = "chart2"
+            st.rerun()
+    elif st.session_state.current_chart_display == "chart2":
+        if st.button("<-", key="prev_chart_btn"):
+            st.session_state.current_chart_display = "chart1"
+            st.rerun()
