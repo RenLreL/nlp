@@ -109,7 +109,7 @@ class DatasetBuilder:
 
     @staticmethod
     def remove_media_clues(df, outlet_names, outlet_name_variations):
-        df["text"] = df["title"] + df["maintext"]
+        df["text"] = df["title"] + " " + df["maintext"]
         df["text"] = df["text"].str.slice(0, 1024) # BERT accepts 128 tokens, approx. 512 characters, w/ tolerance 1024
         media_names = outlet_names
         media_abbreviations = outlet_name_variations
