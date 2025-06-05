@@ -118,7 +118,10 @@ class DatasetBuilder:
         to_remove = [clue for clue in media_name_clues if len(clue) > 2]
         
         regex_text = '|'.join(map(re.escape, to_remove))
-        pattern = re.compile(regex_text, flags=re.IGNORECASE)
+        pattern = re.compile(
+            rf'(^|[ \t.])({regex_text})(?=[ \t.]|$)',
+            re.IGNORECASE
+        )
         df["text"] = df["text"].str.replace(pattern, '', regex=True)
 
         return df
