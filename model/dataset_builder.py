@@ -80,22 +80,14 @@ class DatasetBuilder:
         ratings_data = RatingsData(RATINGS_DIRECTORY)
 
         print("(2/X) Matching and Joining Ratings and Articles")
-        article_bias_data = ArticleBiasData(news_articles_data, ratings_data)
-        dataset = article_bias_data.get_combined_dataset()
+        self.article_bias_data = ArticleBiasData(news_articles_data, ratings_data)
+        dataset = self.article_bias_data.get_combined_dataset()
 
 
-        print("3/X) Weight Media Outlets, Remove Clues, Enumerate Classes, Train-Val-Test-Split")
+        print("3/X) Weight Media Outlets, Remove Clues, Enumerate Classes, Train-Validation-Test-Split")
 
         dataset = self.cap_media_fraction(dataset)
-
-        media_names = article_bias_data.outlet_name_variations["name"].tolist()
-        media_abbreviations = article_bias_data.outlet_name_variations["name_modification"].tolist()
-
-        dataset = self.remove_media_clues(
-            dataset,
-            media_names,
-            media_abbreviations
-        )
+        dataset = self.remove_media_clues(dataset)
 
         dataset, self.label2id, self.id2label = self.enumerate_classes(
             df=dataset,
@@ -107,21 +99,33 @@ class DatasetBuilder:
         return datasets
     
 
-    @staticmethod
-    def remove_media_clues(df, outlet_names, outlet_name_variations):
-        df["text"] = df["title"] + " " + df["maintext"]
-        df["text"] = df["text"].str.slice(0, 1024) # BERT accepts 128 tokens, approx. 512 characters, w/ tolerance 1024
-        media_names = outlet_names
-        media_abbreviations = outlet_name_variations
-        media_name_clues = media_names + media_abbreviations
+
+    def remove_media_clues(self, df):
+
+        media_name_df = self.article_bias_data.media_clues
+        url_extract_df = self.article_bias_data.get_article_url_extracts()
+
+        media_names = media_name_df["name"].tolist()
+        media_abbreviations = media_name_df["name_modification"].tolist()
+        url_extracts = url_extract_df["url_extract"].to_list()
+
+        media_name_clues = media_names + media_abbreviations + url_extracts
         media_name_clues = list(dict.fromkeys(media_name_clues))
         to_remove = [clue for clue in media_name_clues if len(clue) > 2]
         
         regex_text = '|'.join(map(re.escape, to_remove))
-        pattern = re.compile(
-            rf'(^|[ \t.])({regex_text})(?=[ \t.]|$)',
-            re.IGNORECASE
+        separators = r'[ \t.\(\)\[\]\{\}<>-]'
+
+        regex_pattern = (
+            rf'(?:^|{separators})({regex_text})'
+            + rf'|'
+            + rf'({regex_text})(?={separators}|$)'
         )
+
+        pattern = re.compile(regex_pattern, re.IGNORECASE)
+
+        df["text"] = df["title"] + " " + df["maintext"]
+        df["text"] = df["text"].str.slice(0, 1024) # BERT Base accepts 128 tokens, approx. 512 characters, w/ tolerance 1024
         df["text"] = df["text"].str.replace(pattern, '', regex=True)
 
         return df

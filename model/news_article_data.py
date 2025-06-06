@@ -34,14 +34,14 @@ class NewsArticleData:
         json_filepaths = [os.path.join(json_dir, file) for file in json_files]
         df_list = [pd.read_json(filepath) for filepath in json_filepaths]
 
-        # df_list = [pd.read_json(os.path.join(json_dir, file)) for file in json_files]
         combined_df = pd.concat(df_list, axis=1)
         column_names = list(combined_df.index)
 
         transposed_df = combined_df.T
         transposed_df.columns = column_names
 
-        news_articles = transposed_df.drop_duplicates(subset="title", keep='first')
+        unique_news_article_slice = transposed_df.drop_duplicates(subset="title", keep='first')
+        news_articles = unique_news_article_slice.copy()
         
         return news_articles
     
@@ -62,8 +62,8 @@ class NewsArticleData:
         ]
 
         for c in format_columns:
-            news_articles[c] = news_articles[c].astype(str)
-            news_articles[c] = news_articles[c].str.replace(r'[^a-zA-Z0-9 .,;:!?(){}"%-]+', '', regex=True)
-            news_articles[c] = news_articles[c].str.replace(r'\t', '', regex=True)
+            news_articles.loc[:, c] = news_articles[c].astype(str)
+            news_articles.loc[:, c] = news_articles[c].str.replace(r'[^a-zA-Z0-9 .,;:!?(){}"%-]+', '', regex=True)
+            news_articles.loc[:, c] = news_articles[c].str.replace(r'\t', '', regex=True)
 
         return news_articles

@@ -22,7 +22,7 @@ class ArticleBiasData:
         self.article_url_extracts = self.get_article_url_extracts()
         outlet_name_variator = OutletNameVariator(self.ratings)
         self.outlet_name_variations = outlet_name_variator.get_outlet_name_variations()
-        print(self.outlet_name_variations)
+        self.media_clues = outlet_name_variator.get_media_clue_variations()
 
         outlet_url_matchmaker = OutletUrlMatchmaker(
             self.article_url_extracts,

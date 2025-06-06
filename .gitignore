@@ -8,4 +8,5 @@ model/bert_news_classifier
 *.h5
 *.tsv
 *.ipynb
+*.json
 .python-version

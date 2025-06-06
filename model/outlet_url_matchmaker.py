@@ -34,11 +34,16 @@ class OutletUrlMatchmaker:
         )
         matches = [extract(q) for q in url_dataset["url_extract"]]
 
-        best_match, edits = zip(
-            *[
-                (m[0] if m else None, m[1] if m else None) for m in matches
-            ]
-        )
+        best_match = []
+        edits = []
+
+        for m in matches:
+            if m is None:
+                best_match.append(None)
+                edits.append(None)
+            else:
+                best_match.append(m[0])
+                edits.append(m[1])
 
         match_df = url_dataset.copy()
         match_df["match"] = best_match
@@ -50,6 +55,7 @@ class OutletUrlMatchmaker:
             right_on="name_modification",
             how="inner"
         )
+
         match_df = match_df.drop_duplicates(["url"])
 
         return match_df
@@ -72,6 +78,6 @@ class OutletUrlMatchmaker:
         )
 
         articles_ratings = articles_ratings.drop_duplicates(subset="title", keep='first', ignore_index=True)
-        articles_ratings = articles_ratings[["name", "bias", "source_domain", "title", "description", "maintext"]]
+        articles_ratings = articles_ratings[["name", "bias", "source_domain", "title", "maintext"]]
         
         return articles_ratings

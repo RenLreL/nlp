@@ -18,6 +18,7 @@ import pandas as pd
 import tensorflow as tf
 import json
 
+from sklearn.utils import class_weight
 from sklearn.model_selection import train_test_split
 from transformers import (
     AutoTokenizer,
@@ -79,10 +80,21 @@ class TrainModel():
             metrics=["accuracy"],
         )
 
+        y_train = train_df["label_id"].values
+
+        weights = class_weight.compute_class_weight(
+            class_weight="balanced",
+            classes=np.arange(len(label2id)),
+            y=y_train)
+
+        class_weights = dict(enumerate(weights))
+        print(class_weights)
+
         history = model.fit(
             train_tokenized,
             validation_data=val_tokenized,
             epochs=epochs,
+            class_weight=class_weights, 
         )
 
         model.save_pretrained("bert_news_classifier")
