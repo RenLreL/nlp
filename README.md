@@ -32,7 +32,7 @@ Thereby we want to avoid the model focusing on accidental media name mentions in
 - Windows: `powershell -ExecutionPolicy ByPass -c "irm <https://astral.sh/uv/install.ps1> | iex"`
 - pipx: `pipx install uv`
 
-Verfy installtion with: `uv --help`
+  Verfy installtion with: `uv --help`
 
 Note: The commands to install uv have not been tested as uv was already installed when making this project. If you run into trouble with the commands above, search the internet for how to install uv or ask an AI of your choice.
 
