@@ -176,11 +176,11 @@ class_translations = {
 
 article_data_filename = "articleDataExample.csv"
 script_path = Path(__file__).resolve()
-frontend_folder_path = script_path.parent.parent
+frontend_folder_path = script_path.parent
 article_data_path = frontend_folder_path / article_data_filename
 article_data_path_str = str(article_data_path)
 
-df_csv = pd.read_csv(article_data_path)
+df_csv = pd.read_csv(article_data_path_str)
 
 classes_order = ["left", "left-center", "center", "right-center", "right"]
 media_order = df_csv["Medium"].unique()
