@@ -36,13 +36,13 @@ Thereby we want to avoid the model focusing on accidental media name mentions in
 
   Note: The commands to install uv have not been tested as uv was already installed when making this project. If you run into trouble with the commands above, search the internet for how to install uv or ask an AI of your choice.
 
-1. Move into the folder "frontend" `cd frontend`. The command assumes you are in the folder "nlp"
+1. Make sure you are in the folder "nlp"
 
 1. Run command `uv sync`. This command should make you a .venv based on the pyproject.toml.
 
 1. Turn off all virtual enviroments that may be turned on by default by running the command `deactivate` or `conda deactivate`. This might not be strictly necessary but is documented as a step for the sake of consistency.
 
-1. Run the API and the streamlit app. You will need a split terminal to run both at the same time. Make sure you are in the directory "frontend" in both terminals. Run the command `uv run python src/api.py` in one terminal first and the command `uv run streamlit run src/streamlitapp.py`in the other second. After running the second command, the streamlit app should open automatically in your default browser.
+1. Run the API and the streamlit app. You will need a split terminal to run both at the same time. Make sure you are in the directory "nlp" in both terminals. Run the command `uv run python src/backend/api.py` in one terminal first and the command `uv run streamlit run src/frontend/streamlitapp.py`in the other second. After running the second command, the streamlit app should open automatically in your default browser.
 
 ## Usage
 

@@ -15,3 +15,10 @@ dependencies = [
 [build-system]
 requires = ["setuptools>=61.0"] # Or another build backend like hatchling, poetry-core
 build-backend = "setuptools.build_meta"
+
+# --- setuptools configuration for finding packages ---
+# --- CORRECTED setuptools configuration for finding packages ---
+[tool.setuptools.packages.find] # <-- Notice the '.find' here
+where = ["src"]                  # This line now goes under '.find'
+# If you also need 'include' for specific packages within 'src', it goes here too:
+# include = ["backend*", "frontend*"] # Example if both are primary packages
