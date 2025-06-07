@@ -5,6 +5,7 @@ import requests
 import plotly.graph_objects as go
 import pandas as pd
 import plotly.express as px
+from pathlib import Path
 
 # Set page configuration
 st.set_page_config(
@@ -17,6 +18,7 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+
     /* Style for the text input box */
     .stTextArea > div > div > textarea {
         border: 1px solid #cccccc;
@@ -34,6 +36,88 @@ st.markdown(
         padding: 0px !important; /* Removes padding from the row container */
         margin: 0px !important;  /* Removes margin from the row container */
         gap: 0px !important;     /* Removes gap between columns in flexbox layouts */
+    }
+
+    /* Button colours */
+
+    /* Primary button styling */
+
+    button[kind="primary"] {
+        background-color: #4CAF50;
+        color: white;        
+        border: none;
+        outline: none;
+    }
+    /* Hover state */
+    button[kind="primary"]:hover {
+        background-color: #45a049;
+    }
+    /* Active (clicked/held down) state */
+    button[kind="primary"]:active {
+        background-color: #3e8e41;
+    }
+    /* Focus state (after click or tabbing) */
+    button[kind="primary"]:focus,
+    button[kind="primary"]:focus-visible {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        outline: none;
+    }
+
+    /* Secondary button styling */
+
+    button[kind="secondary"] {
+        background-color: #CC3333;
+        color: white !important;
+        border: none;
+        outline: none;
+    }
+    /* Hover state */
+    button[kind="secondary"]:hover {
+        background-color: #990000;
+        color: white !important;
+    }
+    /* Active (clicked/held down) state */
+    button[kind="secondary"]:active {
+        background-color: #800000;
+        color: white !important;
+    }
+    /* Focus state */
+    button[kind="secondary"]:focus,
+    button[kind="secondary"]:focus-visible {
+        background-color: #CC3333;
+        color: white !important;
+        border: none;
+        outline: none;
+        box-shadow: none;
+    }
+
+    /* Tertiary button styling */
+
+    button[kind="tertiary"] {
+        background-color: #e0e0e0;
+        color: #333333 !important;
+        border: none;
+        outline: none;
+        padding: 0px 10px !important;
+    /* Hover state */
+    button[kind="tertiary"]:hover {
+        background-color: #d0d0d0;
+        color: #333333 !important;
+    }
+    /* Active (clicked/held down) state */
+    button[kind="tertiary"]:active {
+        background-color: #c0c0c0;
+        color: #333333 !important;
+    }
+    /* Focus state */
+    button[kind="tertiary"]:focus,
+    button[kind="tertiary"]:focus-visible {
+        background-color: #e0e0e0;
+        color: #333333 !important;
+        border: none;
+        outline: none;
     }
     </style>
     """,
@@ -58,11 +142,11 @@ background_colour = "#ffffff"
 
 # Colours of the classes. Edit the list to change the colours.
 colors_classes = [
-    "rgba(0, 119, 204, 0.8)",    
-    "rgba(51, 153, 204, 0.8)",   
-    "rgba(153, 153, 153, 0.8)",  
-    "rgba(255, 102, 102, 0.8)",  
-    "rgba(255, 51, 51, 0.8)"     
+    "#4169E1",
+    "#8195D1",
+    "#C0C0C0",
+    "#C67A7A",
+    "#CC3333",
 ]
 
 color_map_classes = {
@@ -88,7 +172,15 @@ class_translations = {
 }
 
 # Data Prep for article-based evaluation and to correctly display order
-df_csv = pd.read_csv("/Users/chi/Documents/DHBW/Semester_6/NLP/nlp/frontend/articleDataExample.csv")
+# Constructing the absolute path because relative didn't work
+
+article_data_filename = "articleDataExample.csv"
+script_path = Path(__file__).resolve()
+frontend_folder_path = script_path.parent.parent
+article_data_path = frontend_folder_path / article_data_filename
+article_data_path_str = str(article_data_path)
+
+df_csv = pd.read_csv(article_data_path)
 
 classes_order = ["left", "left-center", "center", "right-center", "right"]
 media_order = df_csv["Medium"].unique()
@@ -263,7 +355,7 @@ st.header("Dein eigener Text")
 st.text("")
 
 # Layout
-col_user_input, col_spacer, col_analysis = st.columns([37, 1, 40])
+col_user_input, col_spacer, col_analysis = st.columns([36, 2, 40])
 
 # Section of user input, i. e. the text box and its buttons
 with col_user_input:
@@ -277,17 +369,17 @@ with col_user_input:
     )
 
     # Buttons
-    col1, col2 = st.columns([4, 1])
+    col1, col2 = st.columns([5, 1])
 
     # Triggers analysis
     with col1:
-        analyze_clicked = st.button("Analysiere")
+        analyze_clicked = st.button("Analysiere", type="primary")
     
     # Deletes user input and only user input. Rest of the page remains uneffected
     with col2:
         def clear_text():
             st.session_state.user_input = ""
-        st.button("Lösche Input", on_click=clear_text)
+        st.button("Lösche Input", on_click=clear_text, type="secondary")
 
 # Displays the analysis of the user input
 with col_analysis:
@@ -361,7 +453,7 @@ st.write("---")
 
 # ---- Analysis of different media (beginning) ----
 
-st.title("aus Medien")
+st.header("aus Medien")
 st.text("")
 st.text("")
 
@@ -419,7 +511,7 @@ with chart_col:
                 st.markdown(bullet_links, unsafe_allow_html=True)
             else:
                 # This will be shown when no segment has been clicked yet, or if the selection is cleared
-                st.info("Klicke auf ein farbiges Segment eines Balkens, um zu sehen, aus welchen Artikeln es besteht.")
+                st.info("Klicke auf ein farbiges Segment eines Balkens, um zu sehen, aus welchen Artikeln es besteht (klicke mehrmals, wenn es beim ersten Klick nicht selektiert).")
 
         # ---- Enable clicking on the chart (end) ----
             
@@ -431,11 +523,11 @@ with chart_col:
 with nav_col:
     st.markdown("<div style='height: 210px';></div>", unsafe_allow_html=True)
     if st.session_state.current_chart_display == "chart1":
-        if st.button("->", key="next_chart_btn"):
+        if st.button("->", key="next_chart_btn", type="tertiary"):
             st.session_state.current_chart_display = "chart2"
             st.rerun()
     elif st.session_state.current_chart_display == "chart2":
-        if st.button("<-", key="prev_chart_btn"):
+        if st.button("<-", key="prev_chart_btn", type="tertiary"):
             st.session_state.current_chart_display = "chart1"
             st.rerun()
 
