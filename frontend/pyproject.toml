@@ -1,0 +1,17 @@
+# pyproject.toml
+[project]
+name = "political-leaning-api"
+version = "0.1.0"
+description = "A Flask API for political text leaning detection"
+requires-python = "==3.12.*"
+
+dependencies = [
+  "flask>=3.1.1",
+  "flask-cors>=6.0.0",
+  "plotly>=6.1.2",
+  "streamlit>=1.45.1",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"] # Or another build backend like hatchling, poetry-core
+build-backend = "setuptools.build_meta"
