@@ -2,3 +2,5 @@ political_leaning_api.egg-info
 .DS_Store
 **/.DS_Store
 .venv
+modell_klassen_notebooks
+__pycache__
