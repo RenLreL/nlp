@@ -34,7 +34,7 @@ Thereby we want to avoid the model focusing on accidental media name mentions in
 
   Verfy installtion with `uv --help`
 
-  Note: The commands to install uv have not been tested as uv was already installed when making this project. If you run into trouble with the commands above, search the internet for how to install uv or ask an AI of your choice.
+  Note: The commands to install uv have not been tested as we had uv already installed when making this project. If you run into trouble with the commands above, search the internet for how to install uv or ask an AI of your choice.
 
 1. Make sure you are in the folder "nlp"
 
