@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from transformers import AutoTokenizer, TFAutoModelForSequenceClassification
-#from datasets import Dataset # Not directly used in the Classifier class, but kept from original
-#from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay # Not directly used, but kept from original
 import json
 from pathlib import Path
 

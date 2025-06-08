@@ -3,7 +3,7 @@ import numpy as np
 import sys
 from pathlib import Path
 
-# Path adjustment for imports
+# Path standardisation
 current_script_dir = Path(__file__).resolve().parent
 project_root = current_script_dir.parent
 
