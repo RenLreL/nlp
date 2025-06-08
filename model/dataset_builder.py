@@ -125,7 +125,7 @@ class DatasetBuilder:
         pattern = re.compile(regex_pattern, re.IGNORECASE)
 
         df["text"] = df["title"] + " " + df["maintext"]
-        df["text"] = df["text"].str.slice(0, 1024) # BERT Base accepts 128 tokens, approx. 512 characters, w/ tolerance 1024
+        df["text"] = df["text"].str.slice(0, 2048)
         df["text"] = df["text"].str.replace(pattern, '', regex=True)
 
         return df

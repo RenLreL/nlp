@@ -27,6 +27,7 @@ from transformers import (
 )
 from datasets import Dataset 
 from pathlib import Path
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 
 MODEL_NAME = "bert-base-uncased"
@@ -56,7 +57,6 @@ class TrainModel():
 
 
         train_tokenized, val_tokenized = self.tokenize_datasets(train_df, val_df)
-        print(val_tokenized)
 
         model = TFAutoModelForSequenceClassification.from_pretrained(
             MODEL_NAME,
@@ -65,9 +65,9 @@ class TrainModel():
             label2id=label2id,
         )
 
-        epochs = 1#3
+        max_epochs = 10
         steps_per_epoch = len(train_tokenized)
-        num_train_steps = steps_per_epoch * epochs
+        num_train_steps = steps_per_epoch * max_epochs
         optimizer, schedule = create_optimizer(
             init_lr=2e-5,
             num_warmup_steps=int(0.1 * num_train_steps),
@@ -90,11 +90,19 @@ class TrainModel():
         class_weights = dict(enumerate(weights))
         print(class_weights)
 
-        history = model.fit(
+        early_stopping = EarlyStopping(
+            monitor='val_accuracy',
+            patience=2,
+            mode='max',
+            restore_best_weights=True
+        )
+
+        model.fit(
             train_tokenized,
             validation_data=val_tokenized,
-            epochs=epochs,
-            class_weight=class_weights, 
+            epochs=max_epochs,
+            class_weight=class_weights,
+            callbacks=[early_stopping]
         )
 
         model.save_pretrained("bert_news_classifier")
@@ -128,6 +136,7 @@ class TrainModel():
             shuffle=True,
             batch_size=32,
         )
+        
         val_tfds = val_ds_hf.to_tf_dataset(
             columns=["input_ids", "attention_mask"],
             label_cols=["label_id"],
@@ -142,7 +151,7 @@ class TrainModel():
             batch["text"],
             truncation=True,
             padding="max_length",
-            max_length=128,
+            max_length=256,
         )
         return tokenized
 

@@ -109,7 +109,6 @@ class OutletNameVariator:
     def remove_parentheses_info(outlet_name):
         name_parentheses_list = outlet_name.split(" (")
         name_clean = name_parentheses_list[0]
-        print(name_clean)
         return name_clean
 
 
