@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import plotly.express as px
 from pathlib import Path
+import ast
 
 # Set page configuration
 st.set_page_config(
@@ -174,13 +175,11 @@ class_translations = {
 # Data Prep for article-based evaluation and to correctly display order
 # Constructing the absolute path because relative didn't work
 
-article_data_filename = "articleDataExample.csv"
 script_path = Path(__file__).resolve()
-frontend_folder_path = script_path.parent
-article_data_path = frontend_folder_path / article_data_filename
+project_root = script_path.parent.parent.parent
+article_data_path = project_root / "article_classification" / "formatted_articles.csv"
 article_data_path_str = str(article_data_path)
-
-df_csv = pd.read_csv(article_data_path_str)
+df_csv = pd.read_csv(article_data_path_str, sep=";")
 
 classes_order = ["left", "left-center", "center", "right-center", "right"]
 media_order = df_csv["Medium"].unique()
@@ -194,16 +193,19 @@ df_csv = df_csv.reset_index(drop=True)
 
 df_csv["Class_german"] = df_csv["Class"].map(class_translations)
 
-# Dummy data as placeholder for class-based evaluation
-data_class_avg = {
-    "Junge Welt": [0.1, 0.2, 0.3, 0.15, 0.25],    
-    "nd": [0.2, 0.1, 0.25, 0.15, 0.3],            
-    "Jacobin": [0.15, 0.25, 0.1, 0.2, 0.3],       
-    "tagesschau": [0.22, 0.18, 0.2, 0.2, 0.2],    
-    "taz": [0.17, 0.23, 0.3, 0.1, 0.2],           
-    "Junge Freiheit": [0.05, 0.15, 0.3, 0.2, 0.3],
-    "Tichys Einblick": [0.1, 0.1, 0.1, 0.3, 0.4]  
-}
+# For class-based evaluation
+medium_data_path = project_root / "article_classification" / "formatted_media.csv"
+medium_data_path_str = str(medium_data_path)
+medium_df = pd.read_csv(medium_data_path_str, sep=";")
+
+def parse_string_to_list(s):
+    parsed_obj = ast.literal_eval(s)
+    return parsed_obj
+
+medium_df['probabilities'] = medium_df['probabilities'].apply(parse_string_to_list)
+
+data_class_avg = dict(zip(medium_df['Medium'], medium_df['probabilities']))
+print(data_class_avg)
 
 # Convert dictionary to dataframe for plotting
 def dict_to_pdf(data_dict):
