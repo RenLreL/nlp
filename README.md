@@ -48,11 +48,14 @@ Thereby we want to avoid the model focusing on accidental media name mentions in
 
 1. Install uv if not already installed. Choose one of the methods below based on your system.
 
-  Standalone
+Standalone
+
 - macOS: `sh <(curl -fsSL <https://astral.sh/uv/install.sh>)`
 - Windows: `powershell -ExecutionPolicy ByPass -c "irm <https://astral.sh/uv/install.ps1> | iex"`
 
-  Other
+
+Other
+
 - pip: `pip install uv`
 - pipx: `pipx install uv`
 - homebrew:`brew install uv`
