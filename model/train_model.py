@@ -9,29 +9,46 @@ Authors: Laélia Chi <lae.chi.22@heilbronn.dhbw.de>;
 (Edited 2025-06-04: Marco Diepold <mar.diepold.22@heilbronn.dhbw.de>)
 """
 
-# from dataset_builder import DatasetBuilder
-import numpy as np
-import pandas as pd
-import tensorflow as tf
-import numpy as np
-import pandas as pd
-import tensorflow as tf
-import json
 
+from pathlib import Path
+import json
+import numpy as np
+import pandas as pd
 from sklearn.utils import class_weight
-from sklearn.model_selection import train_test_split
-import keras
+
+import torch
+from torch import nn
+
+from datasets import Dataset, disable_caching
 from transformers import (
     AutoTokenizer,
-    TFAutoModelForSequenceClassification,
-    DataCollatorWithPadding
+    AutoModelForSequenceClassification,
+    DataCollatorWithPadding,
+    Trainer,
+    TrainingArguments,
+    EarlyStoppingCallback
 )
-from datasets import Dataset 
-from pathlib import Path
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+import evaluate
 
 
 MODEL_NAME = "bert-base-uncased"
+disable_caching()      
+
+class WeightedTrainer(Trainer):
+    """
+    A Hugging Face Trainer that injects per-class weights into CrossEntropyLoss.
+    """
+    def __init__(self, class_weights: torch.Tensor, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.class_weights = class_weights
+
+    def compute_loss(self, model, inputs, return_outputs=False):
+        labels = inputs.pop("labels")
+        outputs = model(**inputs)
+        logits = outputs.logits
+        loss_fnc = nn.CrossEntropyLoss(weight=self.class_weights.to(logits.device))
+        loss = loss_fnc(logits, labels)
+        return (loss, outputs) if return_outputs else loss
 
 
 class TrainModel():
@@ -41,12 +58,19 @@ class TrainModel():
 
 
         self.tok = AutoTokenizer.from_pretrained(MODEL_NAME)
+
+        self.accuracy_metric = evaluate.load("accuracy")
         
         train_df, val_df, test_df = (
-            pd.read_csv("intermediary_data_test.tsv", sep="\t"),
             pd.read_csv("intermediary_data_train.tsv", sep="\t"),
-            pd.read_csv("intermediary_data_val.tsv", sep="\t")
+            pd.read_csv("intermediary_data_val.tsv", sep="\t"),
+            pd.read_csv("intermediary_data_test.tsv", sep="\t")
         )
+
+        train_df.rename(columns={"label_id": "labels"}, inplace=True)
+        val_df.rename(columns={"label_id": "labels"}, inplace=True)
+        test_df.rename(columns={"label_id": "labels"}, inplace=True)
+
 
         id2labeljson = Path("id2label.json")
         with id2labeljson.open("r", encoding="utf-8") as f:
@@ -56,53 +80,66 @@ class TrainModel():
         with label2idjson.open("r", encoding="utf-8") as f:
             label2id = json.load(f)
 
-        model = TFAutoModelForSequenceClassification.from_pretrained(
+
+        train_ds, val_ds = self.tokenize_datasets(train_df, val_df)
+
+        self.model = AutoModelForSequenceClassification.from_pretrained(
             MODEL_NAME,
             num_labels=len(label2id),
             id2label=id2label,
             label2id=label2id,
         )
+        
 
-        train_tokenized, val_tokenized = self.tokenize_datasets(train_df, val_df, model)
+        y_train = train_df["labels"].values
 
-        optimizer = keras.optimizers.Adam(learning_rate=2e-5)
-
-        model.compile(
-            optimizer=optimizer,
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-            metrics=["accuracy"],
-        )
-
-        y_train = train_df["label_id"].values
-
-        class_weighting_steps = np.arange(len(label2id))
         weights = class_weight.compute_class_weight(
             class_weight="balanced",
-            classes=class_weighting_steps,
-            y=y_train)
-
-        class_weights = dict(enumerate(weights))
-        print(class_weights)
-
-        early_stopping = keras.callbacks.EarlyStopping(
-            monitor='val_accuracy',
-            patience=2,
-            mode='max',
-            restore_best_weights=True
+            classes=np.arange(len(label2id)),
+            y=y_train,
         )
 
-        model.fit(
-            train_tokenized,
-            validation_data=val_tokenized,
-            epochs=max_epochs,
-            class_weight=class_weights,
-            callbacks=[early_stopping]
+        class_weights = torch.tensor(weights, dtype=torch.float32)
+
+        data_collator = DataCollatorWithPadding(self.tok, return_tensors="pt")
+
+
+        args = TrainingArguments(
+            output_dir="bert_news_classifier",
+            evaluation_strategy="epoch",
+            save_strategy="epoch",
+            load_best_model_at_end=True,
+            metric_for_best_model="accuracy",
+            num_train_epochs=max_epochs,
+            per_device_train_batch_size=32,
+            per_device_eval_batch_size=32,
+            learning_rate=2e-5,
+            weight_decay=0.01,
+            logging_first_step=True,
+            logging_steps=50,
+            report_to="none",
+            push_to_hub=False,
         )
 
-        model.save_pretrained("bert_news_classifier")
+        trainer = WeightedTrainer(
+            class_weights=class_weights,
+            model=self.model,
+            args=args,
+            train_dataset=train_ds,
+            eval_dataset=val_ds,
+            tokenizer=self.tok,
+            data_collator=data_collator,
+            compute_metrics=self.compute_metrics,
+            callbacks=[EarlyStoppingCallback(early_stopping_patience=2)]
+        )
+
+        trainer.train()
+
+        trainer.save_model("bert_news_classifier")
         self.tok.save_pretrained("bert_news_classifier")
         with open("bert_news_classifier/label2id.json", "w") as f:
             json.dump(label2id, f, indent=2)
+
 
 
 
@@ -115,51 +152,38 @@ class TrainModel():
     #     return train_df, val_df, test_df
     
 
-    def tokenize_datasets(self, train_df, val_df, model):
+    def tokenize_datasets(self, train_df, val_df):
 
-        train_ds_hf = Dataset.from_pandas(train_df[["text", "label_id"]]).map(
-            self.tokenize, batched=True, remove_columns=["text"]
-        )
-        val_ds_hf = Dataset.from_pandas(val_df[["text", "label_id"]]).map(
-            self.tokenize, batched=True, remove_columns=["text"]
-        )
+        train_ds = Dataset.from_pandas(train_df[["text", "labels"]])
+        val_ds = Dataset.from_pandas(val_df[["text", "labels"]])
 
-        train_ds_hf = Dataset.from_pandas(train_df[["text", "label_id"]])
-        val_ds_hf = Dataset.from_pandas(val_df[["text", "label_id"]])
+        tokenized_train = train_ds.map(self.tokenize, batched=True, remove_columns=["text"])
+        tokenized_val = val_ds.map(self.tokenize, batched=True, remove_columns=["text"])
 
-        tokenized_train = train_ds_hf.map(self.tokenize, batched=True)
-        tokenized_val = val_ds_hf.map(self.tokenize, batched=True)
-
-        data_collator = DataCollatorWithPadding(tokenizer=self.tok, return_tensors="tf")
-
-        train_tfds = model.prepare_tf_dataset(
-            tokenized_train,
-            collate_fn=data_collator,
-            label_col="label_id",
-            batch_size=32,
-            shuffle=True,
-        )
-        
-        val_tfds = model.prepare_tf_dataset(
-            tokenized_val,
-            collate_fn=data_collator,
-            label_col="label_id",
-            batch_size=32,
-            shuffle=False,
-        )
-
-        return train_tfds, val_tfds
+        return tokenized_train, tokenized_val
 
 
     def tokenize(self, batch):
+
         tokenized = self.tok(
             batch["text"],
             truncation=True,
             padding="max_length",
             max_length=256,
         )
-        
+
         return tokenized
+    
+
+
+    def compute_metrics(self, eval_pred):
+        logits, labels = eval_pred
+        preds = logits.argmax(axis=-1)
+        computed = TrainModel.accuracy_metric.compute(
+            predictions=preds,
+            references=labels
+        )
+        return computed
 
 
 
