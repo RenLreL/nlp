@@ -20,10 +20,11 @@ import json
 
 from sklearn.utils import class_weight
 from sklearn.model_selection import train_test_split
+import keras
 from transformers import (
     AutoTokenizer,
     TFAutoModelForSequenceClassification,
-    create_optimizer,
+    DataCollatorWithPadding
 )
 from datasets import Dataset 
 from pathlib import Path
@@ -36,7 +37,7 @@ MODEL_NAME = "bert-base-uncased"
 class TrainModel():
 
 
-    def __init__(self):
+    def __init__(self, max_epochs=10):
 
 
         self.tok = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -55,9 +56,6 @@ class TrainModel():
         with label2idjson.open("r", encoding="utf-8") as f:
             label2id = json.load(f)
 
-
-        train_tokenized, val_tokenized = self.tokenize_datasets(train_df, val_df)
-
         model = TFAutoModelForSequenceClassification.from_pretrained(
             MODEL_NAME,
             num_labels=len(label2id),
@@ -65,14 +63,9 @@ class TrainModel():
             label2id=label2id,
         )
 
-        max_epochs = 10
-        steps_per_epoch = len(train_tokenized)
-        num_train_steps = steps_per_epoch * max_epochs
-        optimizer, schedule = create_optimizer(
-            init_lr=2e-5,
-            num_warmup_steps=int(0.1 * num_train_steps),
-            num_train_steps=num_train_steps,
-        )
+        train_tokenized, val_tokenized = self.tokenize_datasets(train_df, val_df, model)
+
+        optimizer = keras.optimizers.Adam(learning_rate=2e-5)
 
         model.compile(
             optimizer=optimizer,
@@ -82,15 +75,16 @@ class TrainModel():
 
         y_train = train_df["label_id"].values
 
+        class_weighting_steps = np.arange(len(label2id))
         weights = class_weight.compute_class_weight(
             class_weight="balanced",
-            classes=np.arange(len(label2id)),
+            classes=class_weighting_steps,
             y=y_train)
 
         class_weights = dict(enumerate(weights))
         print(class_weights)
 
-        early_stopping = EarlyStopping(
+        early_stopping = keras.callbacks.EarlyStopping(
             monitor='val_accuracy',
             patience=2,
             mode='max',
@@ -121,7 +115,7 @@ class TrainModel():
     #     return train_df, val_df, test_df
     
 
-    def tokenize_datasets(self, train_df, val_df):
+    def tokenize_datasets(self, train_df, val_df, model):
 
         train_ds_hf = Dataset.from_pandas(train_df[["text", "label_id"]]).map(
             self.tokenize, batched=True, remove_columns=["text"]
@@ -130,21 +124,32 @@ class TrainModel():
             self.tokenize, batched=True, remove_columns=["text"]
         )
 
-        train_tfds = train_ds_hf.to_tf_dataset(
-            columns=["input_ids", "attention_mask"],
-            label_cols=["label_id"],
-            shuffle=True,
+        train_ds_hf = Dataset.from_pandas(train_df[["text", "label_id"]])
+        val_ds_hf = Dataset.from_pandas(val_df[["text", "label_id"]])
+
+        tokenized_train = train_ds_hf.map(self.tokenize, batched=True)
+        tokenized_val = val_ds_hf.map(self.tokenize, batched=True)
+
+        data_collator = DataCollatorWithPadding(tokenizer=self.tok, return_tensors="tf")
+
+        train_tfds = model.prepare_tf_dataset(
+            tokenized_train,
+            collate_fn=data_collator,
+            label_col="label_id",
             batch_size=32,
+            shuffle=True,
         )
         
-        val_tfds = val_ds_hf.to_tf_dataset(
-            columns=["input_ids", "attention_mask"],
-            label_cols=["label_id"],
-            shuffle=False,
+        val_tfds = model.prepare_tf_dataset(
+            tokenized_val,
+            collate_fn=data_collator,
+            label_col="label_id",
             batch_size=32,
+            shuffle=False,
         )
 
         return train_tfds, val_tfds
+
 
     def tokenize(self, batch):
         tokenized = self.tok(
@@ -153,6 +158,7 @@ class TrainModel():
             padding="max_length",
             max_length=256,
         )
+        
         return tokenized
 
 
