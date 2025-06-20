@@ -42,6 +42,7 @@ Thereby we want to avoid the model focusing on accidental media name mentions in
 
 ## The Model
 
+- IMPORTANT: how to make the model accessible for the code in this project
 - what are we using (BERT, Tensorflow, Keras ...)
 - what steps of preprocessing do we do
 - what is the output
