@@ -4,3 +4,5 @@ political_leaning_api.egg-info
 .venv
 modell_klassen_notebooks
 __pycache__
+checkpoint-51422
+best_model

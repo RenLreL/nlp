@@ -67,8 +67,7 @@ One defining characteristic of Trump’s second term is that he’s moving simul
 # Define a fixture for the Classifier
 @pytest.fixture(scope="session")
 def classifier_instance():
-    test_model_path = project_root / "modell_klassen_notebooks" / "bert_news_classifier"
-    return Classifier(model_dir=test_model_path)
+    return Classifier()
 
 def test_classifier_initialization_success(classifier_instance):
     # Checking if initialization completes without error
@@ -82,7 +81,7 @@ def test_classify_basic_text(classifier_instance):
     # Note: expected label could differ for different models
     label_fox = classifier_instance.classify(fox_article, return_probs=False)
     assert isinstance(label_fox, str)
-    assert label_fox == 'left-center'
+    assert label_fox == 'left'
     print(f"Assertion passed: label_fox is '{label_fox}' (expected 'left-center')")
 
     label_cnn = classifier_instance.classify(cnn_article, return_probs=False)

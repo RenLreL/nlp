@@ -366,7 +366,7 @@ with col_user_input:
     user_input = st.text_area(
         "Gib einen Text ein:",
         height=410,
-        placeholder="Dein politischer Text...",
+        placeholder="Dein englischer politischer Text...",
         key="user_input"
     )
 

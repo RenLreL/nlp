@@ -1,10 +1,12 @@
 # Estimating Political Bias of Texts on the Basis of a Large News Dataset
 
-This project aims to classify text into political leanings (left, left-center, center, right-center, right). It has three sections that are visible for the user:
+This project aims to make a working application to classify text into political leanings (left, left-center, center, right-center, right) using a model that we fine-tuned for this purpose. It has three sections that are visible for the user:
 
 - a section where the user can have their own text evaluated and classified
 - a section where different media are evaluated based on class average
 - a section where different media are evaluated based on article classification
+
+The focus of the project is on the functionality of the application while the accuracy of the model's classifications is an optional goal as its performance is hard to guarantee in advance.
 
 ## Description
 
@@ -23,7 +25,7 @@ There are also a few tests provided.
 
 When the user enters their text, it is send to the API which sends it to the `text_classification.py` script where the text is preprocessed and then given the model to evaluate. The output of the model is returned to the API which hands it to the frontend for display.
 
-To display the charts of the different media, the scraped data is also preprocessed and given the script to evaluate each article. The results are then further aggregated based on the average probability of each class per medium and the number of articles for each class. The results are saved as csv-files so they don't need to be re-calculated for every refresh of the page. These files are then read by the frontend to visualize them as stacked bar charts. The frontend can not trigger a re-calculation of these values, only read the files. If a re-calculation of the scraped articles is needed (e. g. when the model is swapped out), the respective scripts must be run again.
+To display the charts of the different media, the scraped data is also preprocessed and given the script to evaluate each article. The results are then further aggregated based on the average probability of each class per medium and the number of articles for each class. The results are saved as csv-files so they don't need to be re-calculated for every refresh of the page. These files are then read by the frontend to visualize them as stacked bar charts. The frontend can not trigger a re-calculation of these values, only read the files. If a re-calculation of the scraped articles is needed (e. g. when the model is swapped out), the respective scripts must be run again (`uv run article_classification/classify_articles.py` first, then `uv run article_classification/formatting_articles.py` and `uv run article_classification/formatting_media.py`).
 
 ## Data
 

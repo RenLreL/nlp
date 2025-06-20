@@ -7,19 +7,10 @@ from backend.text_classification import Classifier
 app = Flask(__name__)
 CORS(app)
 
-# Pass the user text to the model and get the classification
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-BERT_MODEL_PATH = PROJECT_ROOT / "modell_klassen_notebooks" / "bert_news_classifier"
-
-# To make sure it's the correct path
-print(f"Attempting to load model from: {BERT_MODEL_PATH}")
-
 try:
-    classifier_instance = Classifier(model_dir=BERT_MODEL_PATH)
+    classifier_instance = Classifier()
 except FileNotFoundError as e:
     print(f"Error initializing Classifier: {e}")
-    print(f"Please ensure your model is saved at: {BERT_MODEL_PATH}")
-    # You might want to exit or disable prediction if the model can't be loaded
     classifier_instance = None # Set to None or handle appropriately
 
 # Define the API endpoint for political leaning prediction

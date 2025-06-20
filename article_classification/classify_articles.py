@@ -31,7 +31,6 @@ class ArticleClassifier:
         """
         self.scraped_data_path = current_script_dir / Path("politik_artikel.csv")
         self.medium_data_path = current_script_dir / Path("title_link.csv")
-        self.bert_model_dir = project_root / "modell_klassen_notebooks" / "bert_news_classifier"
 
         self.df_scraped = None
         self.df_medium = None
@@ -40,13 +39,12 @@ class ArticleClassifier:
 
         # Try to initialize the classifier early
         if Classifier:
-            print(f"Attempting to load classification model from: {self.bert_model_dir}")
+            print(f"Attempting to load classification model from")
             try:
-                self.classifier_instance = Classifier(model_dir=self.bert_model_dir)
+                self.classifier_instance = Classifier()
                 print("Classifier initialized successfully.")
             except FileNotFoundError as e:
                 print(f"Error initializing Classifier: {e}")
-                print(f"Please ensure your model is saved at: {self.bert_model_dir}")
                 self.classifier_instance = None
             except Exception as e:
                 print(f"An unexpected error occurred during Classifier initialization: {e}")
