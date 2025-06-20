@@ -42,10 +42,13 @@ Thereby we want to avoid the model focusing on accidental media name mentions in
 
 ## The Model
 
-- IMPORTANT: how to make the model accessible for the code in this project
-- what are we using (BERT, Tensorflow, Keras ...)
-- what steps of preprocessing do we do
-- what is the output
+The model is a pytorch model that needs to be places inside the project to make it accessible to the code. Here is how to do that:
+
+1. Open the google drive link that you have received via e-mail
+1. Navigate to nlp/model/results by clicking the respective folders
+1. If you are in the results-folder, you should see several pther folders. Download the folders called "best_model" (that is the tokenizer) and the folder called "checkpoint-51422" (that was the best performing model of the checkpoints)
+1. Place each folder into the root directory of this project. Their paths should be "nlp/best_model" and "nlp/checkpoint-51422" respectively
+1. Now the model should be usable for the code
 
 ## Getting Started
 
@@ -70,7 +73,9 @@ Thereby we want to avoid the model focusing on accidental media name mentions in
 
 1. Run the API and the streamlit app. You will need a split terminal to run both at the same time. Make sure you are in the directory "nlp" in both terminals. Run the command `uv run python src/backend/api.py` in one terminal first and the command `uv run streamlit run src/frontend/streamlitapp.py`in the other second. After running the second command, the streamlit app should open automatically in your default browser.
 
-To run the tests, run the command `uv run pytest tests/tests.py`
+To run the tests, run the command `uv run pytest tests/tests.py`. Replace `tests.py` with another filename to run that file instead.
+
+Hint: If you unexpectedly need more packages or modules, run `uv add` plus the name of the package. Example: `uv add pandas`.
 
 ## Usage
 
@@ -81,8 +86,6 @@ Once the site is running, paste a political article into the textbox and press t
 ### Classification of different media
 
 When you scroll down the page, there is a stacked bar chart displaying the political leaning of different media. You can hover over each segment to see the information in a more concise way. The numbers were calculated by first getting the model's estimate on how likely each class is for each article, and then averaging the values per class for each medium. If you click the grey button "->" on the right of the chart, you should see another stacked bar chart. You can hover over the segments here as well. This time, it evaluates the classes based on how many articles of that class appeared in each medium. In this chart, you can click on the segments (it might take multiple clicks) to see which article went into the clicked class. The titles of the articles are listed on the right of the chart and when clicked, it will open a new tab to the article. To return to the previous stacked bar chart, click the grey button "<-" again.
-
-## Help
 
 ## Authors
 
@@ -95,5 +98,3 @@ Yaren Sude Erol <yar.erol.22@heilbronn.dhbw.de>;
 Leon Gerke <leo.gerke.22@heilbronn.dhbw.de>;
 
 Dominic von Olnhausen <dom.vonolnhausen.22@heilbronn.dhbw.de>
-
-## Acknowledgement
