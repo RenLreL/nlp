@@ -9,3 +9,12 @@ model/
 *.ipynb
 *.json
 .python-version
+
+political_leaning_api.egg-info
+.DS_Store
+**/.DS_Store
+.venv
+modell_klassen_notebooks
+__pycache__
+checkpoint-51422
+best_model

@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+<<<<<<< HEAD
 import random
 
 # Initialize the Flask application
@@ -11,6 +12,21 @@ app = Flask(__name__)
 # Without CORS, your browser would block the API requests for security reasons.
 CORS(app)
 
+=======
+from pathlib import Path
+from backend.text_classification import Classifier
+
+# Initialize the Flask application
+app = Flask(__name__)
+CORS(app)
+
+try:
+    classifier_instance = Classifier()
+except FileNotFoundError as e:
+    print(f"Error initializing Classifier: {e}")
+    classifier_instance = None # Set to None or handle appropriately
+
+>>>>>>> origin/main
 # Define the API endpoint for political leaning prediction
 @app.route('/predict_leaning', methods=['POST'])
 def predict_leaning():
@@ -32,6 +48,7 @@ def predict_leaning():
     # Validate if text was provided
     if not text_to_analyze:
         return jsonify({"error": "No 'text' field found in the request"}), 400
+<<<<<<< HEAD
 
     # --- Dummy Political Leaning Prediction Logic ---
     # In a real application, you would integrate your machine learning model here.
@@ -79,4 +96,19 @@ def predict_leaning():
 if __name__ == '__main__':
     # Run the Flask app on localhost, port 5000.
     # debug=True allows for automatic reloading on code changes and provides a debugger.
+=======
+    
+    # Pass the user text to the model and get the classification
+    predicted_label, probabilities = classifier_instance.classify(text_to_analyze, return_probs=True)
+
+    # Log the received text and the simulated response for debugging
+    print(f"Received text: '{text_to_analyze}'")
+    print(f"Predicted leaning: {probabilities}")
+
+    # Return the JSON response
+    return jsonify(probabilities), 200
+
+# This block ensures the Flask app runs only when the script is executed directly
+if __name__ == '__main__':
+>>>>>>> origin/main
     app.run(debug=True, port=5000)
