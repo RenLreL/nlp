@@ -5,7 +5,7 @@ Authors: Laélia Chi <lae.chi.22@heilbronn.dhbw.de>;
     Yaren Sude Erol <yar.erol.22@heilbronn.dhbw.de>;
     Leon Gerke <leo.gerke.22@heilbronn.dhbw.de>;
     Dominic von Olnhausen <dom.vonolnhausen.22@heilbronn.dhbw.de>
-(Edited 2025-05-26: Marco Diepold <mar.diepold.22@heilbronn.dhbw.de>)
+(Edited 2025-06-20: Marco Diepold <mar.diepold.22@heilbronn.dhbw.de>)
 """
 
 

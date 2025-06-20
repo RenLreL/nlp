@@ -5,7 +5,7 @@ Authors: Laélia Chi <lae.chi.22@heilbronn.dhbw.de>;
     Yaren Sude Erol <yar.erol.22@heilbronn.dhbw.de>;
     Leon Gerke <leo.gerke.22@heilbronn.dhbw.de>;
     Dominic von Olnhausen <dom.vonolnhausen.22@heilbronn.dhbw.de>
-(Edited 2025-05-26: Marco Diepold <mar.diepold.22@heilbronn.dhbw.de>)
+(Edited 2025-06-20: Marco Diepold <mar.diepold.22@heilbronn.dhbw.de>)
 """
 
 
@@ -44,7 +44,7 @@ class DatasetBuilder:
         self.dataset = dataset
 
         for key, value in dataset.items():
-            value.to_csv(f"intermediary_data_{key}.tsv", sep="\t")
+            value.to_csv(f"tsv/intermediary_data_{key}.tsv", sep="\t")
 
         self.get_id2label()
         self.get_label2id()
@@ -54,14 +54,14 @@ class DatasetBuilder:
         return self.dataset
     
     def get_label2id(self):
-        out_file = Path(CURRENT_DIR).joinpath("label2id.json")
+        out_file = Path(CURRENT_DIR).joinpath("labels/label2id.json")
         with out_file.open("w", encoding="utf-8") as f:
             json.dump(self.label2id, f, indent=2)
 
         return self.label2id
     
     def get_id2label(self):
-        out_file = Path(CURRENT_DIR).joinpath("id2label.json")
+        out_file = Path(CURRENT_DIR).joinpath("labels/id2label.json")
         with out_file.open("w", encoding="utf-8") as f:
             json.dump(self.id2label, f, indent=2)
         return self.id2label

@@ -1,10 +1,9 @@
 data/AllSides_Rankings/*
 data/268k_American_News_Articles/crawl_json
 notebooks/*
-!notebooks/f.lastname/
 .venv
 **/__pycache__/
-model/bert_news_classifier
+model/
 *.h5
 *.tsv
 *.ipynb
