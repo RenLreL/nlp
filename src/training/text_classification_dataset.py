@@ -8,22 +8,9 @@ Authors: Laélia Chi <lae.chi.22@heilbronn.dhbw.de>;
 (Edited 2025-06-20: Marco Diepold <mar.diepold.22@heilbronn.dhbw.de>)
 """
 
-import json
-import os
-import pandas as pd
 import torch
-import numpy as np
-from datetime import datetime
 from torch.utils.data import Dataset
-from transformers import (
-    DistilBertTokenizer,
-    DistilBertForSequenceClassification,
-    TrainingArguments,
-    Trainer,
-    EarlyStoppingCallback,
-)
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support
-from sklearn.utils.class_weight import compute_class_weight
+
 
 class TextClassificationDataset(Dataset):
     """

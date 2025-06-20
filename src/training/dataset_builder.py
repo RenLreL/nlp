@@ -20,16 +20,16 @@ from pathlib import Path
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from article_bias_data import ArticleBiasData
-from news_article_data import NewsArticleData
-from ratings_data import RatingsData
+from .article_bias_data import ArticleBiasData
+from .news_article_data import NewsArticleData
+from .ratings_data import RatingsData
 
 
 CURRENT_DIR = Path(__file__).parent
-BASE_DIR = CURRENT_DIR.parent
+BASE_DIR = CURRENT_DIR.parent.parent
 DEFAULT_NEWS_ARTICLES_DIR = BASE_DIR / "data/268k_American_News_Articles/crawl_json/"
 DEFAULT_RATINGS_FILE = BASE_DIR / "data/AllSides_Rankings/allsides.csv"
-DEFAULT_OUTPUT_DIR = CURRENT_DIR / "dist"
+DEFAULT_OUTPUT_DIR = CURRENT_DIR / "output"
 
 SEED = 42
 

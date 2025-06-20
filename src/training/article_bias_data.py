@@ -16,8 +16,8 @@ Authors: Laélia Chi <lae.chi.22@heilbronn.dhbw.de>;
 """
 
 import pandas as pd
-from outlet_name_variator import OutletNameVariator
-from outlet_url_matchmaker import OutletUrlMatchmaker
+from .outlet_name_variator import OutletNameVariator
+from .outlet_url_matchmaker import OutletUrlMatchmaker
 
 
 class ArticleBiasData:
@@ -120,6 +120,9 @@ class ArticleBiasData:
 
         if start_index == 0:
             start_index = 1
+
+        if domain_parts[0] != "www":
+            start_index = 0
 
         extractions = domain_parts[start_index:end_index]
         name = "".join(extractions)

@@ -24,13 +24,12 @@ from transformers import (
     DistilBertTokenizer,
     DistilBertForSequenceClassification,
     TrainingArguments,
-    Trainer,
     EarlyStoppingCallback,
 )
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.utils.class_weight import compute_class_weight
-from text_classification_dataset import TextClassificationDataset
-from weighted_loss_trainer import WeightedLossTrainer
+from .text_classification_dataset import TextClassificationDataset
+from .weighted_loss_trainer import WeightedLossTrainer
 
 
 class ModelTrainer:
@@ -212,11 +211,11 @@ if __name__ == '__main__':
         'eval_batch_size': 8,
         'warmup_steps': 500,
         'weight_decay': 0.01,
-        'label2id_path': "labels/label2id.json",
-        'id2label_path': "labels/id2label.json",
-        'train_data_file': "tsv/intermediary_data_train.tsv",
-        'val_data_file': "tsv/intermediary_data_val.tsv",
-        'test_data_file': "tsv/intermediary_data_test.tsv"
+        'label2id_path': "output/labels/label2id.json",
+        'id2label_path': "output/labels/id2label.json",
+        'train_data_file': "output/data_train.tsv",
+        'val_data_file': "output/data_val.tsv",
+        'test_data_file': "output/data_test.tsv"
     }
 
     model_trainer = ModelTrainer(config)
