@@ -1,4 +1,9 @@
 """
+Trains models on the media bias dataset and chooses the best one.
+
+This script trains a DistilBert Model for up to ten epochs and chooses
+the best one with earlystopping to avoid overfitting.
+
 Copyright 2025
 Authors: Laélia Chi <lae.chi.22@heilbronn.dhbw.de>;
     Marco Diepold <mar.diepold.22@heilbronn.dhbw.de>;
@@ -26,12 +31,6 @@ from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.utils.class_weight import compute_class_weight
 from text_classification_dataset import TextClassificationDataset
 from weighted_loss_trainer import WeightedLossTrainer
-
-
-
-
-
-
 
 
 class ModelTrainer:
@@ -196,22 +195,6 @@ class ModelTrainer:
         for key, value in test_results.items():
             print(f"{key}: {value:.4f}")
 
-    def save_model(self):
-        """
-        Saves the best model and tokenizer to the output directory.
-        The Trainer already saves the best checkpoint, this provides a final
-        clean copy.
-        """
-        if not self.trainer:
-            print("Model has not been trained yet.")
-            return
-
-        output_dir = self.config['output_dir']
-        print(f"\nSaving final best model to {output_dir}")
-        self.trainer.save_model(output_dir)
-        self.tokenizer.save_pretrained(output_dir)
-        print("Model saved successfully.")
-
 
 if __name__ == '__main__':
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -240,4 +223,3 @@ if __name__ == '__main__':
     model_trainer.setup()
     model_trainer.train()
     model_trainer.evaluate()
-    model_trainer.save_model()

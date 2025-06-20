@@ -1,4 +1,10 @@
 """
+Matches and merges news articles with media ratings using fuzzy URL matching.
+
+This module contains the OutletUrlMatchmaker class, which links articles to
+media outlets by fuzzy matching a key part of the article's URL with a list
+of known media outlet name variations.
+
 Copyright 2025
 Authors: Laélia Chi <lae.chi.22@heilbronn.dhbw.de>;
     Marco Diepold <mar.diepold.22@heilbronn.dhbw.de>;
@@ -8,76 +14,107 @@ Authors: Laélia Chi <lae.chi.22@heilbronn.dhbw.de>;
 (Edited 2025-06-20: Marco Diepold <mar.diepold.22@heilbronn.dhbw.de>)
 """
 
-
 import pandas as pd
 from rapidfuzz import process
-from nltk.metrics.distance import edit_distance
 
 
 class OutletUrlMatchmaker:
+    """
+    Finds matches between article URLs and outlet names to merge datasets.
 
+    This class uses fuzzy string matching to create a map between article URLs
+    and canonical outlet names. It then uses this map to merge a full article
+    dataset with a media ratings dataset.
 
-    def __init__(self, url_dataset, name_dataset):
-        self.match_df = self.match_datasets(
-            url_dataset,
-            name_dataset
+    Attributes:
+        url_df (pd.DataFrame): DataFrame with extracted URL components.
+        name_variations_df (pd.DataFrame): DataFrame with variations of outlet names.
+    """
+
+    def __init__(self, url_dataset: pd.DataFrame, name_dataset: pd.DataFrame):
+        """
+        Initializes the OutletUrlMatchmaker with data needed for matching.
+
+        Args:
+            url_dataset (pd.DataFrame): A DataFrame containing at least a
+                'url' and 'url_extract' column.
+            name_dataset (pd.DataFrame): A DataFrame containing at least a
+                'name' and 'name_modification' column.
+        """
+        self.url_df = url_dataset
+        self.name_variations_df = name_dataset
+
+    def merge_datasets(
+        self, rating_name_dataset: pd.DataFrame, article_url_dataset: pd.DataFrame
+    ) -> pd.DataFrame:
+        """
+        Merges the ratings and articles datasets using a URL-to-name map.
+
+        This is the main public method that orchestrates the entire process of
+        matching and merging the final datasets.
+
+        Args:
+            rating_name_dataset (pd.DataFrame): The full dataset of media ratings,
+                containing a 'name' column.
+            article_url_dataset (pd.DataFrame): The full dataset of articles,
+                containing 'source_domain', 'title', and 'maintext' columns.
+
+        Returns:
+            pd.DataFrame: A clean, merged DataFrame with articles linked to their
+            bias ratings.
+        """
+        url_to_name_map = self._create_url_to_name_map()
+
+        articles_with_names = article_url_dataset.merge(
+            url_to_name_map, left_on="source_domain", right_on="url", how="inner"
         )
 
-
-    def match_datasets(self, url_dataset, name_dataset):
-        threshold = 85
-        choices = name_dataset["name_modification"].to_list()
-        extract = lambda query: process.extractOne(
-            query,
-            choices,
-            score_cutoff=threshold  
+        articles_with_ratings = articles_with_names.merge(
+            rating_name_dataset, on="name", how="inner"
         )
-        matches = [extract(q) for q in url_dataset["url_extract"]]
 
-        best_match = []
-        edits = []
+        articles_with_ratings = articles_with_ratings.drop_duplicates(
+            subset="title", keep="first", ignore_index=True
+        )
+        final_columns = ["name", "bias", "source_domain", "title", "maintext"]
+        return articles_with_ratings[final_columns]
 
-        for m in matches:
-            if m is None:
-                best_match.append(None)
-                edits.append(None)
-            else:
-                best_match.append(m[0])
-                edits.append(m[1])
+    def _create_url_to_name_map(self, threshold: int = 85) -> pd.DataFrame:
+        """
+        Creates a map between article URLs and canonical outlet names.
 
-        match_df = url_dataset.copy()
-        match_df["match"] = best_match
-        match_df["edits"] = edits
+        This method uses fuzzy string matching to find the best outlet name
+        variation for each extracted URL component.
 
-        match_df = match_df.merge(
-            name_dataset,
+        Args:
+            threshold (int): The minimum similarity score (0-100) required
+                for a match.
+
+        Returns:
+            pd.DataFrame: A DataFrame mapping a URL to a canonical outlet name.
+        """
+        choices = self.name_variations_df["name_modification"].to_list()
+        queries = self.url_df["url_extract"]
+
+        extract_one = lambda query: process.extractOne(
+            query, choices, score_cutoff=threshold
+        )
+        matches = queries.apply(extract_one)
+
+        match_results = matches.apply(
+            lambda m: (m[0], m[1]) if m is not None else (None, None)
+        )
+        match_df = self.url_df.copy()
+        match_df[["match", "match_score"]] = pd.DataFrame(
+            match_results.to_list(), index=match_df.index
+        )
+
+        url_name_map = match_df.merge(
+            self.name_variations_df,
             left_on="match",
             right_on="name_modification",
-            how="inner"
+            how="inner",
         )
 
-        match_df = match_df.drop_duplicates(["url"])
-
-        return match_df
-    
-
-    def merge_datasets(self, rating_name_dataset, article_url_dataset):
-        match_df = self.match_df
-
-        articles_names = article_url_dataset.merge(
-            match_df,
-            left_on="source_domain",
-            right_on="url",
-            how="inner"
-        )
-
-        articles_ratings = articles_names.merge(
-            rating_name_dataset,
-            on="name",
-            how="inner"
-        )
-
-        articles_ratings = articles_ratings.drop_duplicates(subset="title", keep='first', ignore_index=True)
-        articles_ratings = articles_ratings[["name", "bias", "source_domain", "title", "maintext"]]
-        
-        return articles_ratings
+        url_name_map = url_name_map.drop_duplicates(["url"])
+        return url_name_map[["url", "name"]]
