@@ -1,3 +1,15 @@
+data/AllSides_Rankings/*
+data/268k_American_News_Articles/crawl_json
+notebooks/*
+.venv
+**/__pycache__/
+model/
+*.h5
+*.tsv
+*.ipynb
+*.json
+.python-version
+
 political_leaning_api.egg-info
 .DS_Store
 **/.DS_Store
